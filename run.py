@@ -22,7 +22,9 @@ def __api__(end_point, args, api_url=API_BASE_URL):
     if response.status_code == 200:
         return response.json()
     else:
-        pass
+        raise requests.HTTPError(
+            f"Request failed with status {response.status_code} for URL: {url}"
+        )
 
 
 parser = argparse.ArgumentParser(description="Process start and end dates.")
