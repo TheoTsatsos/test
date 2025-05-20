@@ -16,7 +16,9 @@ def get_top_wiki_articles(project, year, month, day, access="all-access"):
 
 def __api__(end_point, args, api_url=API_BASE_URL):
     url = "/".join([api_url, end_point, args])
-    response = requests.get(url, headers={"User-Agent": "wiki parcer"})
+    response = requests.get(
+        url, headers={"User-Agent": "wiki parser"}, timeout=10
+    )
     if response.status_code == 200:
         return response.json()
     else:
