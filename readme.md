@@ -4,3 +4,11 @@ Dates should be specified in YYYYMMDD format.
 
 Your task is to improve this script. The criteria are simplicity and reliability.
 Please complete the task within 24 hours from the time you receive it.
+
+### Installing dependencies
+
+Make sure the required Python packages are installed before running the script:
+
+```bash
+pip install -r requirements.txt
+```
