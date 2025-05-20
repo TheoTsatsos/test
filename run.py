@@ -1,6 +1,5 @@
 import requests
 import argparse
-import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
@@ -60,18 +59,9 @@ last_values = df.groupby("article")["views"].last()
 top_articles = last_values.nlargest(20)
 df_top_articles = df[df["article"].isin(top_articles.index)]
 
-views_sum = {article: 0 for article in df_top_articles["article"].unique()}
-count = {article: 0 for article in df_top_articles["article"].unique()}
-
-for i in range(len(df_top_articles)):
-    article = df_top_articles.iloc[i]["article"]
-    views = df_top_articles.iloc[i]["views"]
-    views_sum[article] += views
-    count[article] += 1
-
-mean_views = {article: views_sum[article] / count[article] for article in views_sum}
-
-mean_views = int(np.nanmean(list(mean_views.values())))
+mean_views = int(
+    df_top_articles.groupby("article")["views"].mean().mean()
+)
 max_views = df["views"].max()
 unique_articles = df["article"].nunique()
 
