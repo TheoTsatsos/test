@@ -38,9 +38,9 @@ delta = dt.timedelta(days=1)
 
 df = pd.DataFrame()
 while start_date <= end_date:
-    year = str(start_date.year)
-    month = str(start_date.month)
-    day = str(start_date.day)
+    year = start_date.strftime("%Y")
+    month = start_date.strftime("%m")
+    day = start_date.strftime("%d")
     start_date += delta
     data = get_top_wiki_articles("en.wikipedia", year, month, day)
     data = pd.DataFrame(data["items"][0]["articles"])
