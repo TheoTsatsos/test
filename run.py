@@ -26,8 +26,8 @@ def __api__(end_point, args, api_url=API_BASE_URL):
 
 
 parser = argparse.ArgumentParser(description="Process start and end dates.")
-parser.add_argument("start", type=str, help="The start date in YYYY-MM-DD format")
-parser.add_argument("end", type=str, help="The end date in YYYY-MM-DD format")
+parser.add_argument("start", type=str, help="The start date in YYYYMMDD format")
+parser.add_argument("end", type=str, help="The end date in YYYYMMDD format")
 args = parser.parse_args()
 start = args.start
 end = args.end
