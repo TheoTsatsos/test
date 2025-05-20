@@ -25,54 +25,65 @@ def __api__(end_point, args, api_url=API_BASE_URL):
         )
 
 
-parser = argparse.ArgumentParser(description="Process start and end dates.")
-parser.add_argument("start", type=str, help="The start date in YYYYMMDD format")
-parser.add_argument("end", type=str, help="The end date in YYYYMMDD format")
-args = parser.parse_args()
-start = args.start
-end = args.end
+def main():
+    parser = argparse.ArgumentParser(description="Process start and end dates.")
+    parser.add_argument("start", type=str, help="The start date in YYYYMMDD format")
+    parser.add_argument("end", type=str, help="The end date in YYYYMMDD format")
+    args = parser.parse_args()
+    start = args.start
+    end = args.end
 
-start_date = dt.datetime.strptime(start, "%Y%m%d")
-end_date = dt.datetime.strptime(end, "%Y%m%d")
-delta = dt.timedelta(days=1)
+    start_date = dt.datetime.strptime(start, "%Y%m%d")
+    end_date = dt.datetime.strptime(end, "%Y%m%d")
+    delta = dt.timedelta(days=1)
 
-df = pd.DataFrame()
-while start_date <= end_date:
-    year = start_date.strftime("%Y")
-    month = start_date.strftime("%m")
-    day = start_date.strftime("%d")
-    start_date += delta
-    data = get_top_wiki_articles("en.wikipedia", year, month, day)
-    data = pd.DataFrame(data["items"][0]["articles"])
-    data["date"] = f"{year}{month}{day}"
-    df = pd.concat([df, data])
+    df = pd.DataFrame()
+    while start_date <= end_date:
+        year = start_date.strftime("%Y")
+        month = start_date.strftime("%m")
+        day = start_date.strftime("%d")
+        start_date += delta
+        data = get_top_wiki_articles("en.wikipedia", year, month, day)
+        data = pd.DataFrame(data["items"][0]["articles"])
+        data["date"] = f"{year}{month}{day}"
+        df = pd.concat([df, data])
 
-df["date"] = pd.to_datetime(df["date"])
-idx = pd.MultiIndex.from_product([df["article"].unique(), pd.date_range(start=df["date"].min(), end=df["date"].max())], names=["article", "date"])
+    df["date"] = pd.to_datetime(df["date"])
+    idx = pd.MultiIndex.from_product(
+        [df["article"].unique(), pd.date_range(start=df["date"].min(), end=df["date"].max())],
+        names=["article", "date"],
+    )
 
-df.set_index(["article", "date"], inplace=True)
-df = df.reindex(idx)
-df = df.reset_index(drop=False)
+    df.set_index(["article", "date"], inplace=True)
+    df = df.reindex(idx)
+    df = df.reset_index(drop=False)
 
-df["views"] = df.groupby("article")["views"].transform(lambda x: x.ffill())
-last_values = df.groupby("article")["views"].last()
-top_articles = last_values.nlargest(20)
-df_top_articles = df[df["article"].isin(top_articles.index)]
+    df["views"] = df.groupby("article")["views"].transform(lambda x: x.ffill())
+    last_values = df.groupby("article")["views"].last()
+    top_articles = last_values.nlargest(20)
+    df_top_articles = df[df["article"].isin(top_articles.index)]
 
-mean_views = int(
-    df_top_articles.groupby("article")["views"].mean().mean()
-)
-max_views = df["views"].max()
-unique_articles = df["article"].nunique()
+    mean_views = int(
+        df_top_articles.groupby("article")["views"].mean().mean()
+    )
+    max_views = df["views"].max()
+    unique_articles = df["article"].nunique()
 
-title = f"Top articles wiki views (Mean: {mean_views:.2f}, Max: {max_views}, Articles: {unique_articles})"
+    title = (
+        f"Top articles wiki views (Mean: {mean_views:.2f}, Max: {max_views}, "
+        f"Articles: {unique_articles})"
+    )
 
-plt.figure(figsize=(12, 8))
-for article in df_top_articles["article"].unique():
-    df_article = df_top_articles[df_top_articles["article"] == article]
-    plt.plot(df_article["date"], df_article["views"], label=article)
+    plt.figure(figsize=(12, 8))
+    for article in df_top_articles["article"].unique():
+        df_article = df_top_articles[df_top_articles["article"] == article]
+        plt.plot(df_article["date"], df_article["views"], label=article)
 
-plt.yscale("log")
-plt.title(title)
-plt.legend()
-plt.savefig("top_articles.png")
+    plt.yscale("log")
+    plt.title(title)
+    plt.legend()
+    plt.savefig("top_articles.png")
+
+
+if __name__ == "__main__":
+    main()
